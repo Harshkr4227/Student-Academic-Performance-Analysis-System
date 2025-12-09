@@ -186,59 +186,69 @@ function handleRegister(e) {
     }
     
     (async () => {
-        // Try to register via Supabase if available
         try {
-            const mod = await import('./supabase.js');
-            const supabase = await mod.getSupabaseClient();
-            if (supabase) {
-                const { data, error } = await supabase.auth.signUp({
-                    email: newUser.email,
-                    password: newUser.password
-                });
-                if (error) {
-                    console.warn('Supabase signUp error', error);
-                } else if (data && data.user) {
-                    // Optionally persist profile to 'users' table via Supabase
-                    try {
-                        await supabase.from('users').insert({
-                            id: data.user.id,
-                            email: newUser.email,
-                            role: newUser.role,
-                            firstName: newUser.firstName,
-                            lastName: newUser.lastName,
-                            studentId: newUser.studentId || null,
-                            department: newUser.department || null
-                        });
-                    } catch (err) {
-                        console.warn('Failed to persist user profile to Supabase', err);
-                    }
-                    showMessage('Registration successful! Please login with your credentials.', 'success');
-                    setTimeout(() => window.location.href = 'login.html', 2000);
-                    return;
-                }
-            }
-        } catch (err) {
-            // ignore and fall back to localStorage
-        }
+            // Try to register via Supabase if available
+            try {
+                const mod = await import('./supabase.js');
+                const supabase = await mod.getSupabaseClient();
+                if (supabase) {
+                    const { data, error } = await supabase.auth.signUp({
+                        email: newUser.email,
+                        password: newUser.password
+                    });
+                    if (error) {
+                        console.warn('Supabase signUp error', error);
+                    } else if (data && data.user) {
+                        // Persist profile to 'users' table via Supabase (best-effort)
+                        try {
+                            await supabase.from('users').insert({
+                                id: data.user.id,
+                                email: newUser.email,
+                                role: newUser.role,
+                                firstName: newUser.firstName,
+                                lastName: newUser.lastName,
+                                studentId: newUser.studentId || null,
+                                department: newUser.department || null
+                            });
+                        } catch (err) {
+                            console.warn('Failed to persist user profile to Supabase', err);
+                        }
 
-        // Fallback to localStorage
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        
-        // Check if email already exists
-        if (users.find(u => u.email === newUser.email)) {
-            showMessage('Email already exists. Please use a different email.', 'error');
-            return;
+                        // Auto-login: set currentUser and redirect to dashboard
+                        const appUser = { id: data.user.id, email: newUser.email, role: newUser.role };
+                        localStorage.setItem('currentUser', JSON.stringify(appUser));
+                        showMessage('Registration successful! Redirecting to dashboard...', 'success');
+                        const target = (newUser.role === 'teacher') ? 'teacher-dashboard.html' : 'student-dashboard.html';
+                        setTimeout(() => window.location.href = target, 800);
+                        return;
+                    }
+                }
+            } catch (err) {
+                // ignore and fall back to localStorage
+            }
+
+            // Fallback to localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            // Check if email already exists
+            if (users.find(u => u.email === newUser.email)) {
+                showMessage('Email already exists. Please use a different email.', 'error');
+                return;
+            }
+
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Auto-login locally: set currentUser and redirect to dashboard
+            const appUserLocal = { id: newUser.id, email: newUser.email, role: newUser.role };
+            localStorage.setItem('currentUser', JSON.stringify(appUserLocal));
+            showMessage('Registration successful! Redirecting to dashboard...', 'success');
+            const targetLocal = (newUser.role === 'teacher') ? 'teacher-dashboard.html' : 'student-dashboard.html';
+            setTimeout(() => window.location.href = targetLocal, 800);
+        } catch (err) {
+            console.error('Register flow error', err);
+            showMessage('An unexpected error occurred during registration. See console for details.', 'error');
         }
-        
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        showMessage('Registration successful! Please login with your credentials.', 'success');
-        
-        // Redirect to login page after delay
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 2000);
     })();
 }
 
