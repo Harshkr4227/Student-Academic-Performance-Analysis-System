@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Academic Performance System</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <sidebar class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>EduAnalytics</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#overview" class="nav-item active" onclick="showSection('overview')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#grades" class="nav-item" onclick="showSection('grades')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>My Grades</span>
+                </a>
+                <a href="#attendance" class="nav-item" onclick="showSection('attendance')">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+                <a href="#progress" class="nav-item" onclick="showSection('progress')">
+                    <i class="fas fa-trophy"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="#goals" class="nav-item" onclick="showSection('goals')">
+                    <i class="fas fa-target"></i>
+                    <span>Goals</span>
+                </a>
+                <a href="#schedule" class="nav-item" onclick="showSection('schedule')">
+                    <i class="fas fa-calendar"></i>
+                    <span>Schedule</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name" id="studentName">Student Name</div>
+                        <div class="user-role">Student</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </sidebar>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="header-title">
+                    <h1 id="sectionTitle">Dashboard Overview</h1>
+                    <p id="sectionSubtitle">Track your academic progress and achievements</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportReport()">
+                        <i class="fas fa-download"></i>
+                        Export Report
+                    </button>
+                    <button class="btn btn-primary" onclick="openGoalModal()">
+                        <i class="fas fa-plus"></i>
+                        Set Goal
+                    </button>
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="overallGPA">0.0</div>
+                            <div class="stat-label">Overall GPA</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="attendancePercentage">0%</div>
+                            <div class="stat-label">Attendance Rate</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalCourses">0</div>
+                            <div class="stat-label">Enrolled Courses</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="completedAssignments">0</div>
+                            <div class="stat-label">Assignments Completed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Grade Trends</h3>
+                            <select id="trendPeriod" onchange="updateGradeTrends()">
+                                <option value="semester">This Semester</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                        <div class="card-content">
+                            <canvas id="gradeTrendsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Course Performance</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="course-list" id="coursePerformance">
+                                <!-- Course performance items will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Upcoming Assignments</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="assignment-list" id="upcomingAssignments">
+                                <!-- Upcoming assignments will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Recent Grades</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="grade-list" id="recentGrades">
+                                <!-- Recent grades will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grades Section -->
+            <section id="grades" class="dashboard-section">
+                <div class="grades-container">
+                    <div class="grades-header">
+                        <h3>My Grades</h3>
+                        <div class="grade-filters">
+                            <select id="semesterFilter" onchange="filterGrades()">
+                                <option value="current">Current Semester</option>
+                                <option value="fall2024">Fall 2024</option>
+                                <option value="spring2024">Spring 2024</option>
+                            </select>
+                            <select id="courseFilter" onchange="filterGrades()">
+                                <option value="all">All Courses</option>
+                                <option value="math101">Math 101</option>
+                                <option value="science102">Science 102</option>
+                                <option value="english103">English 103</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grades-grid" id="gradesGrid">
+                        <!-- Grade cards will be populated by JavaScript -->
+                    </div>
+
+                    <div class="grade-analysis">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h3>Grade Distribution</h3>
+                            </div>
+                            <div class="card-content">
+                                <canvas id="gradeDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendance" class="dashboard-section">
+                <div class="attendance-overview">
+                    <div class="attendance-stats">
+                        <div class="attendance-stat">
+                            <div class="stat-number" id="presentDays">0</div>
+                            <div class="stat-label">Present Days</div>
+                        </div>
+                        <div class="attendance-stat">
+                            <div class="stat-number" id="absentDays">0</div>
+                            <div class="stat-label">Absent Days</div>
+                        </div>
+                        <div class="attendance-stat">
+                            <div class="stat-number" id="lateDays">0</div>
+                            <div class="stat-label">Late Days</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Attendance Calendar</h3>
+                            <div class="month-navigation">
+                                <button onclick="previousMonth()"><i class="fas fa-chevron-left"></i></button>
+                                <span id="currentMonth">January 2025</span>
+                                <button onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="calendar" id="attendanceCalendar">
+                                <!-- Calendar will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Attendance by Course</h3>
+                        </div>
+                        <div class="card-content">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progress" class="dashboard-section">
+                <div class="progress-overview">
+                    <div class="progress-cards">
+                        <div class="progress-card">
+                            <div class="progress-header">
+                                <h4>Academic Performance</h4>
+                                <span class="progress-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    +2.3%
+                                </span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 78%"></div>
+                            </div>
+                            <div class="progress-label">78% Overall Performance</div>
+                        </div>
+
+                        <div class="progress-card">
+                            <div class="progress-header">
+                                <h4>Assignment Completion</h4>
+                                <span class="progress-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    +5.1%
+                                </span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 92%"></div>
+                            </div>
+                            <div class="progress-label">92% Completion Rate</div>
+                        </div>
+
+                        <div class="progress-card">
+                            <div class="progress-header">
+                                <h4>Class Participation</h4>
+                                <span class="progress-trend down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    -1.2%
+                                </span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                            <div class="progress-label">85% Participation Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Progress Timeline</h3>
+                        </div>
+                        <div class="card-content">
+                            <canvas id="progressTimelineChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>Achievements</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="achievements-list" id="achievementsList">
+                                <!-- Achievements will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Goals Section -->
+            <section id="goals" class="dashboard-section">
+                <div class="goals-container">
+                    <div class="goals-header">
+                        <h3>Academic Goals</h3>
+                        <button class="btn btn-primary" onclick="openGoalModal()">
+                            <i class="fas fa-plus"></i>
+                            Add Goal
+                        </button>
+                    </div>
+
+                    <div class="goals-list" id="goalsList">
+                        <!-- Goals will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Schedule Section -->
+            <section id="schedule" class="dashboard-section">
+                <div class="schedule-container">
+                    <div class="schedule-header">
+                        <h3>Class Schedule</h3>
+                        <div class="schedule-navigation">
+                            <button onclick="previousWeek()"><i class="fas fa-chevron-left"></i></button>
+                            <span id="currentWeek">Week of January 20, 2025</span>
+                            <button onclick="nextWeek()"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="schedule-grid" id="scheduleGrid">
+                        <!-- Schedule will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Goal Modal -->
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Academic Goal</h3>
+                <button class="modal-close" onclick="closeGoalModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="goalForm">
+                    <div class="form-group">
+                        <label for="goalTitle">Goal Title</label>
+                        <input type="text" id="goalTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalType">Goal Type</label>
+                        <select id="goalType" required>
+                            <option value="">Select Type</option>
+                            <option value="gpa">GPA Improvement</option>
+                            <option value="attendance">Attendance</option>
+                            <option value="assignment">Assignment Completion</option>
+                            <option value="skill">Skill Development</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalTarget">Target Value</label>
+                        <input type="text" id="goalTarget" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDeadline">Target Date</label>
+                        <input type="date" id="goalDeadline" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDescription">Description</label>
+                        <textarea id="goalDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeGoalModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveGoal()">Save Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/data.js"></script>
+    <script src="scripts/student-dashboard.js"></script>
+</body>
+</html>
