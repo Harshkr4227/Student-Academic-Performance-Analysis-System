@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Expose functions used by inline handlers (modules are not global by default)
+if (typeof window !== 'undefined') {
+    window.togglePassword = togglePassword;
+    window.showMessage = showMessage;
+}
+
 function initializeSampleData() {
     // Check if sample data already exists
     if (!localStorage.getItem('users')) {
@@ -88,61 +94,63 @@ function setupRoleBasedForms() {
 
 function handleLogin(e) {
     e.preventDefault();
-    
+
     const formData = new FormData(e.target);
     const email = formData.get('email');
     const password = formData.get('password');
     const role = formData.get('role');
-    
+
     (async () => {
-        // Prefer Supabase authentication if available
-        let user = null;
         try {
-            const mod = await import('./supabase.js');
-            const supabase = await mod.getSupabaseClient();
-            if (supabase) {
-                // Try signing in via Supabase (email + password)
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    console.warn('Supabase signIn error', error);
-                } else if (data && data.user) {
-                    // Map to app user shape minimally
-                    user = { id: data.user.id, email: data.user.email, role: role };
+            // Prefer Supabase authentication if available
+            let user = null;
+            try {
+                const mod = await import('./supabase.js');
+                const supabase = await mod.getSupabaseClient();
+                if (supabase) {
+                    // Try signing in via Supabase (email + password)
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        console.warn('Supabase signIn error', error);
+                    } else if (data && data.user) {
+                        // Map to app user shape minimally
+                        user = { id: data.user.id, email: data.user.email, role: role };
+                    }
                 }
+            } catch (err) {
+                // ignore and fall back to localStorage
+            }
+
+            if (!user) {
+                // Get users from localStorage
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+                // Find user
+                user = users.find(u =>
+                    u.email === email &&
+                    u.password === password &&
+                    u.role === role
+                );
+            }
+
+            if (user) {
+                // Store current user session
+                localStorage.setItem('currentUser', JSON.stringify(user));
+
+                // Show success message
+                showMessage('Login successful! Redirecting...', 'success');
+
+                // Redirect based on role (short delay for UX).
+                const target = (role === 'teacher') ? 'teacher-dashboard.html' : 'student-dashboard.html';
+                setTimeout(() => window.location.href = target, 700);
+                // Fallback navigation in case setTimeout doesn't run (very rare)
+                setTimeout(() => { if (!window.location.href.endsWith(target)) window.location.assign(target); }, 1500);
+            } else {
+                showMessage('Invalid credentials. Please try again.', 'error');
             }
         } catch (err) {
-            // ignore and fall back to localStorage
-        }
-
-        if (!user) {
-            // Get users from localStorage
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            
-            // Find user
-            user = users.find(u => 
-                u.email === email && 
-                u.password === password && 
-                u.role === role
-            );
-        }
-
-        if (user) {
-            // Store current user session
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            
-            // Show success message
-            showMessage('Login successful! Redirecting...', 'success');
-            
-            // Redirect based on role
-            setTimeout(() => {
-                if (role === 'teacher') {
-                    window.location.href = 'teacher-dashboard.html';
-                } else {
-                    window.location.href = 'student-dashboard.html';
-                }
-            }, 1500);
-        } else {
-            showMessage('Invalid credentials. Please try again.', 'error');
+            console.error('Login flow error', err);
+            showMessage('An unexpected error occurred during login. See console for details.', 'error');
         }
     })();
 }
