@@ -1,7 +1,27 @@
 // Sample data and data management functions
 class DataManager {
     constructor() {
+        // Attempt to use remote Supabase if configured; fall back to localStorage
+        this.remoteReady = false;
+        this.supabase = null;
         this.initializeSampleData();
+        this._initRemote();
+    }
+
+    async _initRemote() {
+        try {
+            if (typeof window === 'undefined') return;
+            const mod = await import('./supabase.js');
+            const client = await mod.getSupabaseClient();
+            if (client) {
+                this.supabase = client;
+                this.remoteReady = true;
+                // Optionally sync local data to remote here if desired
+            }
+        } catch (err) {
+            // If dynamic import fails, remain with localStorage fallback
+            console.warn('Supabase not available, using localStorage fallback.', err);
+        }
     }
 
     initializeSampleData() {
@@ -226,7 +246,27 @@ class DataManager {
 
     // Getter methods
     getStudents() {
+        // If remote is ready, prefer fetching from Supabase
+        if (this.remoteReady && this.supabase) {
+            // Note: keep synchronous signature by returning cached local data and
+            // provide async method `fetchStudents` for remote retrieval.
+            return JSON.parse(localStorage.getItem('students') || '[]');
+        }
         return JSON.parse(localStorage.getItem('students') || '[]');
+    }
+
+    // Async remote fetcher (use when remote persistence is desired)
+    async fetchStudents() {
+        if (!this.remoteReady || !this.supabase) return this.getStudents();
+
+        const { data, error } = await this.supabase.from('students').select('*');
+        if (error) {
+            console.error('Supabase fetchStudents error', error);
+            return this.getStudents();
+        }
+        // Optionally cache remote data locally
+        localStorage.setItem('students', JSON.stringify(data));
+        return data;
     }
 
     getStudent(id) {
@@ -258,6 +298,18 @@ class DataManager {
         if (index !== -1) {
             students[index] = student;
             localStorage.setItem('students', JSON.stringify(students));
+        }
+
+        // If remote is configured, try to update remote row asynchronously
+        if (this.remoteReady && this.supabase) {
+            // Best-effort; do not break local behavior on failure
+            (async () => {
+                try {
+                    await this.supabase.from('students').upsert(student, { onConflict: 'id' });
+                } catch (err) {
+                    console.warn('Failed to upsert student to Supabase', err);
+                }
+            })();
         }
     }
 
@@ -307,6 +359,16 @@ class DataManager {
         }
         
         localStorage.setItem('activities', JSON.stringify(activities));
+
+        if (this.remoteReady && this.supabase) {
+            (async () => {
+                try {
+                    await this.supabase.from('activities').insert(activities[0]);
+                } catch (err) {
+                    console.warn('Failed to insert activity to Supabase', err);
+                }
+            })();
+        }
     }
 
     // Analytics methods

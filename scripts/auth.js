@@ -94,34 +94,57 @@ function handleLogin(e) {
     const password = formData.get('password');
     const role = formData.get('role');
     
-    // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
-    // Find user
-    const user = users.find(u => 
-        u.email === email && 
-        u.password === password && 
-        u.role === role
-    );
-    
-    if (user) {
-        // Store current user session
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        // Show success message
-        showMessage('Login successful! Redirecting...', 'success');
-        
-        // Redirect based on role
-        setTimeout(() => {
-            if (role === 'teacher') {
-                window.location.href = 'teacher-dashboard.html';
-            } else {
-                window.location.href = 'student-dashboard.html';
+    (async () => {
+        // Prefer Supabase authentication if available
+        let user = null;
+        try {
+            const mod = await import('./supabase.js');
+            const supabase = await mod.getSupabaseClient();
+            if (supabase) {
+                // Try signing in via Supabase (email + password)
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    console.warn('Supabase signIn error', error);
+                } else if (data && data.user) {
+                    // Map to app user shape minimally
+                    user = { id: data.user.id, email: data.user.email, role: role };
+                }
             }
-        }, 1500);
-    } else {
-        showMessage('Invalid credentials. Please try again.', 'error');
-    }
+        } catch (err) {
+            // ignore and fall back to localStorage
+        }
+
+        if (!user) {
+            // Get users from localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Find user
+            user = users.find(u => 
+                u.email === email && 
+                u.password === password && 
+                u.role === role
+            );
+        }
+
+        if (user) {
+            // Store current user session
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Show success message
+            showMessage('Login successful! Redirecting...', 'success');
+            
+            // Redirect based on role
+            setTimeout(() => {
+                if (role === 'teacher') {
+                    window.location.href = 'teacher-dashboard.html';
+                } else {
+                    window.location.href = 'student-dashboard.html';
+                }
+            }, 1500);
+        } else {
+            showMessage('Invalid credentials. Please try again.', 'error');
+        }
+    })();
 }
 
 function handleRegister(e) {
@@ -154,24 +177,61 @@ function handleRegister(e) {
         newUser.department = formData.get('department');
     }
     
-    // Get existing users and add new user
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
-    // Check if email already exists
-    if (users.find(u => u.email === newUser.email)) {
-        showMessage('Email already exists. Please use a different email.', 'error');
-        return;
-    }
-    
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    showMessage('Registration successful! Please login with your credentials.', 'success');
-    
-    // Redirect to login page after delay
-    setTimeout(() => {
-        window.location.href = 'login.html';
-    }, 2000);
+    (async () => {
+        // Try to register via Supabase if available
+        try {
+            const mod = await import('./supabase.js');
+            const supabase = await mod.getSupabaseClient();
+            if (supabase) {
+                const { data, error } = await supabase.auth.signUp({
+                    email: newUser.email,
+                    password: newUser.password
+                });
+                if (error) {
+                    console.warn('Supabase signUp error', error);
+                } else if (data && data.user) {
+                    // Optionally persist profile to 'users' table via Supabase
+                    try {
+                        await supabase.from('users').insert({
+                            id: data.user.id,
+                            email: newUser.email,
+                            role: newUser.role,
+                            firstName: newUser.firstName,
+                            lastName: newUser.lastName,
+                            studentId: newUser.studentId || null,
+                            department: newUser.department || null
+                        });
+                    } catch (err) {
+                        console.warn('Failed to persist user profile to Supabase', err);
+                    }
+                    showMessage('Registration successful! Please login with your credentials.', 'success');
+                    setTimeout(() => window.location.href = 'login.html', 2000);
+                    return;
+                }
+            }
+        } catch (err) {
+            // ignore and fall back to localStorage
+        }
+
+        // Fallback to localStorage
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        
+        // Check if email already exists
+        if (users.find(u => u.email === newUser.email)) {
+            showMessage('Email already exists. Please use a different email.', 'error');
+            return;
+        }
+        
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        showMessage('Registration successful! Please login with your credentials.', 'success');
+        
+        // Redirect to login page after delay
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+    })();
 }
 
 function togglePassword(inputId = 'password') {
