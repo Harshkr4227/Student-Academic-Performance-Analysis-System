@@ -866,3 +866,13 @@ function logout() {
     localStorage.removeItem('currentUser');
     window.location.href = 'login.html';
 }
+
+// Expose functions used by inline handlers (module scope isn't global)
+if (typeof window !== 'undefined') {
+    window.showSection = showSection;
+    window.exportReport = exportReport;
+    window.openGoalModal = openGoalModal;
+    window.closeGoalModal = closeGoalModal;
+    window.saveGoal = saveGoal;
+    window.logout = logout;
+}

@@ -849,3 +849,10 @@ function logout() {
     localStorage.removeItem('currentUser');
     window.location.href = 'login.html';
 }
+
+// Expose functions used by inline handlers
+if (typeof window !== 'undefined') {
+    window.showSection = showSection;
+    window.exportData = exportData;
+    window.logout = logout;
+}
