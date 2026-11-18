@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal — Sap</title>
+  <script>
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+  </script>
+  <link rel="stylesheet" href="/styles/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-brand">
+          <div class="brand-badge">CA</div>
+          <span>CollegeAcad</span>
+        </div>
+        <nav>
+          <a href="#" class="nav-item active" data-section="overview">📊 Academic Overview</a>
+          <a href="#" class="nav-item" data-section="marksheet">📜 University Marksheet</a>
+          <a href="#" class="nav-item" data-section="attendance">📅 Subject Attendance</a>
+          <a href="#" class="nav-item" data-section="timetable">🕒 Weekly Timetable</a>
+          <a href="#" class="nav-item" data-section="goals">🎯 Academic Goals</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-pill">
+          <div class="avatar-circle" id="sidebarAvatar">ST</div>
+          <div class="user-meta">
+            <strong id="sidebarName">Student</strong>
+            <span id="sidebarRoll">Roll No</span>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" style="width:100%;">Sign Out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="command-bar">
+        <div class="command-title">
+          <h2>Student Academic Portal</h2>
+          <p>Live 10-Point Credit CGPA, Internal & End-Sem Breakdown, and Attendance Status</p>
+        </div>
+        <div class="command-actions">
+          <button type="button" class="btn btn-secondary btn-sm" data-theme-toggle>🌙 Dark</button>
+          <button id="exportMarksheetBtn" type="button" class="btn btn-primary btn-sm">Download Grade Card (CSV)</button>
+        </div>
+      </header>
+
+      <section id="overview" class="dashboard-section active">
+        <div class="grid-4">
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Cumulative CGPA</div>
+              <div class="kpi-value" id="kpiCGPA">0.00</div>
+            </div>
+            <div class="ring-badge">10Pt</div>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Overall Attendance</div>
+              <div class="kpi-value" id="kpiAttendance">100%</div>
+            </div>
+            <div class="ring-badge">75%+</div>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Active Backlogs</div>
+              <div class="kpi-value" id="kpiBacklogs">0</div>
+            </div>
+            <div class="ring-badge">PASS</div>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Academic Status</div>
+              <div class="kpi-value" id="kpiRisk" style="font-size:1.1rem;">-</div>
+            </div>
+            <div class="ring-badge">RISK</div>
+          </div>
+        </div>
+
+        <div class="split-profile-layout">
+          <div class="profile-banner-card">
+            <div class="profile-banner-avatar" id="studentBannerAvatar">ST</div>
+            <h3 id="studentBannerName">Student Name</h3>
+            <p style="font-size:0.84rem; opacity:0.9;" id="studentBannerRoll">12030523000</p>
+            <div class="profile-kv-list">
+              <div class="profile-kv-row"><span>Course</span><strong>B.Tech</strong></div>
+              <div class="profile-kv-row"><span>Semester</span><strong id="studentBannerSem">Semester 5</strong></div>
+              <div class="profile-kv-row"><span>Stream</span><strong id="studentBannerDept">CSE (DS)</strong></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin-bottom:0.75rem;">Subject Marks Breakdown (Internal 30 + End-Sem 70)</h3>
+            <canvas id="marksChart" height="115"></canvas>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="margin-bottom:0.75rem;">University Rule Alerts</h3>
+            <div id="studentRiskAlerts"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:0.75rem;">Faculty Recommendations & Interventions</h3>
+            <div id="studentInterventions"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="marksheet" class="dashboard-section">
+        <div class="card">
+          <h3 style="margin-bottom:0.85rem;">Semester Credit Marksheet (CA1 + CA2 + End-Sem)</h3>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Credits</th>
+                  <th>CA1 (15)</th>
+                  <th>CA2 (15)</th>
+                  <th>Internal (30)</th>
+                  <th>End-Sem (70)</th>
+                  <th>Total (100)</th>
+                  <th>Grade (GP)</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="marksheetBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="attendance" class="dashboard-section">
+        <div class="card">
+          <h3 style="margin-bottom:0.85rem;">Subject-Wise Attendance Register (75% Required)</h3>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Present</th>
+                  <th>Late</th>
+                  <th>Absent</th>
+                  <th>Total Classes</th>
+                  <th>Attendance %</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="timetable" class="dashboard-section">
+        <div id="timetableGrid" class="grid-3"></div>
+      </section>
+
+      <section id="goals" class="dashboard-section">
+        <div class="card" style="margin-bottom:1.25rem;">
+          <h3 style="margin-bottom:0.75rem;">Add Semester Goal</h3>
+          <form id="goalForm" class="toolbar">
+            <input name="title" class="input" placeholder="Goal title (e.g. Score O grade in DBMS)" required />
+            <select name="category" class="input">
+              <option value="CGPA">CGPA</option>
+              <option value="Attendance">Attendance</option>
+              <option value="Backlog Clearance">Backlog Clearance</option>
+              <option value="Skill/Project">Skill/Project</option>
+            </select>
+            <input name="targetValue" class="input" placeholder="Target (e.g. 9.0 SGPA)" required />
+            <input name="progress" type="number" min="0" max="100" class="input" placeholder="Progress %" style="max-width:120px;" />
+            <input name="deadline" type="date" class="input" required />
+            <button type="submit" class="btn btn-primary">Save Goal</button>
+          </form>
+        </div>
+        <div id="goalsGrid" class="grid-3"></div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/scripts/student-dashboard.js"></script>
+</body>
+</html>

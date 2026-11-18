@@ -1,0 +1,14 @@
+# Dependencies & Build Output
+node_modules/
+dist/
+.vite/
+
+# Environment Variables (Keep keys private!)
+.env
+.env.example
+.env.*.local
+
+# OS & Editor Junk
+.DS_Store
+Thumbs.db
+.vscode/

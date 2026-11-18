@@ -1,0 +1,742 @@
+/* ==========================================================================
+   CYAN & STONE THEME — MINDSKILLS-INSPIRED ACADEMIC UI (styles/main.css)
+   ========================================================================== */
+:root {
+  /* Light mode (default) — Monochrome Blue-Gray */
+  --color-primary: #334155;
+  --color-primary-hover: #1E293B;
+  --color-accent: #94A3B8;
+  --color-accent-soft: #F1F5F9;
+
+  --color-bg: #FFFFFF;
+  --color-surface: #F8FAFC;
+  --color-border: #E2E8F0;
+
+  --color-text: #1E293B;
+  --color-text-muted: #64748B;
+  --color-heading: #0F172A;
+
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+}
+
+[data-theme="dark"] {
+  /* Dark mode — Monochrome Blue-Gray */
+  --color-primary: #CBD5E1;
+  --color-primary-hover: #F8FAFC;
+  --color-accent: #64748B;
+  --color-accent-soft: #1E293B;
+
+  --color-bg: #0A0F1A;
+  --color-surface: #111827;
+  --color-border: #1E293B;
+
+  --color-text: #E2E8F0;
+  --color-text-muted: #94A3B8;
+  --color-heading: #F8FAFC;
+
+  --color-success: #4ADE80;
+  --color-warning: #FBBF24;
+  --color-danger: #F87171;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-heading);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+   APP SHELL & SOLID BRANDED SIDEBAR (Reference Layout)
+   ========================================================================== */
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .sidebar {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.75rem 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-surface);
+  border-bottom: 1px solid var(--color-primary-hover);
+  margin-bottom: 1.25rem;
+}
+
+[data-theme="dark"] .sidebar-brand {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-border);
+}
+
+.brand-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+
+[data-theme="dark"] .brand-badge {
+  background-color: var(--color-accent-soft);
+  color: var(--color-primary);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  color: var(--color-accent-soft);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .nav-item {
+  color: var(--color-text-muted);
+}
+
+.nav-item:hover {
+  background-color: var(--color-primary-hover);
+  color: var(--color-surface);
+}
+
+[data-theme="dark"] .nav-item:hover {
+  background-color: var(--color-accent-soft);
+  color: var(--color-heading);
+}
+
+/* Active white pill indicator from Mindskills reference */
+.nav-item.active {
+  background-color: var(--color-surface);
+  color: var(--color-heading);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .nav-item.active {
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.sidebar-user {
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-primary-hover);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+[data-theme="dark"] .sidebar-user {
+  border-top-color: var(--color-border);
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem;
+}
+
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--color-accent-soft);
+  color: var(--color-heading);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.user-meta {
+  overflow: hidden;
+}
+.user-meta strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--color-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-meta span {
+  font-size: 0.76rem;
+  color: var(--color-accent-soft);
+}
+
+[data-theme="dark"] .user-meta strong {
+  color: var(--color-heading);
+}
+[data-theme="dark"] .user-meta span {
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   MAIN CONTENT & TOP COMMAND BAR (Segmented Pills + Search)
+   ========================================================================== */
+.main-content {
+  padding: 1.75rem 2.25rem;
+  background-color: var(--color-bg);
+  min-width: 0;
+}
+
+.command-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1rem 1.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.command-title h2 {
+  font-size: 1.25rem;
+}
+.command-title p {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+
+.command-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Segmented Filter Pills (Mindskills Header Style) */
+.segmented-pills {
+  display: inline-flex;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.2rem;
+  gap: 0.2rem;
+}
+
+.pill-btn {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pill-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+}
+[data-theme="dark"] .pill-btn.active {
+  color: var(--color-bg);
+}
+
+.search-pill {
+  padding: 0.52rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.88rem;
+  min-width: 220px;
+}
+.search-pill:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   CARDS, GRIDS & PROFILE SUMMARY CARD (Screen 2 Reference)
+   ========================================================================== */
+.dashboard-section {
+  display: none;
+}
+.dashboard-section.active {
+  display: block;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.split-profile-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.35rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1.35rem;
+}
+
+/* Branded Left Profile Card (Mindskills Screen 2) */
+.profile-banner-card {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  border-radius: 16px;
+  padding: 1.75rem 1.35rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .profile-banner-card {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.profile-banner-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  background-color: var(--color-accent-soft);
+  color: var(--color-heading);
+  display: grid;
+  place-items: center;
+  font-size: 1.65rem;
+  font-weight: 800;
+  border: 3px solid var(--color-accent);
+}
+
+.profile-banner-card h3 {
+  color: var(--color-surface);
+  margin-bottom: 0.25rem;
+}
+[data-theme="dark"] .profile-banner-card h3 {
+  color: var(--color-heading);
+}
+
+.profile-kv-list {
+  margin-top: 1.25rem;
+  text-align: left;
+  border-top: 1px solid var(--color-primary-hover);
+  padding-top: 1rem;
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+[data-theme="dark"] .profile-kv-list {
+  border-top-color: var(--color-border);
+}
+
+.profile-kv-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kpi-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kpi-label {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--color-heading);
+  margin-top: 0.25rem;
+}
+
+/* Circular Ring Indicator (Mindskills Screen 4) */
+.ring-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid var(--color-accent);
+  background-color: var(--color-accent-soft);
+  color: var(--color-heading);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   DATA TABLES WITH SOLID CYAN HEADER BANNER (Mindskills Screens 1–3)
+   ========================================================================== */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background-color: var(--color-surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead tr {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
+[data-theme="dark"] .table thead tr {
+  background-color: var(--color-accent-soft);
+  color: var(--color-heading);
+}
+
+.table th {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: 0.89rem;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-bg);
+}
+
+/* ==========================================================================
+   STATUS PILLS (Strictly --color-success / --color-warning / --color-danger)
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  border: 1.5px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.badge-info {
+  background-color: var(--color-accent-soft);
+  color: var(--color-heading);
+  border-color: var(--color-primary);
+}
+
+/* Strictly status colors only */
+.badge-low, .badge-present, .badge-pass {
+  color: var(--color-success);
+  border-color: var(--color-success);
+  background-color: transparent;
+}
+
+.badge-medium, .badge-late, .badge-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+  background-color: transparent;
+}
+
+.badge-high, .badge-absent, .badge-fail {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+  background-color: transparent;
+}
+
+/* ==========================================================================
+   FORMS, INPUTS, BUTTONS & MULTI-SELECT ROSTER
+   ========================================================================== */
+.input, select.input {
+  width: 100%;
+  padding: 0.58rem 0.8rem;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+.input:focus, select.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.toolbar .input {
+  width: auto;
+  min-width: 180px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.58rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+}
+[data-theme="dark"] .btn-primary {
+  color: var(--color-bg);
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-heading);
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: var(--color-surface);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+}
+.btn-block {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.roster-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   LANDING & AUTH PAGES
+   ========================================================================== */
+.navbar {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero {
+  max-width: 820px;
+  margin: 5rem auto;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+.hero h1 {
+  font-size: 2.6rem;
+  margin-bottom: 1rem;
+}
+.hero p {
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background-color: var(--color-bg);
+}
+.auth-card {
+  width: 100%;
+  max-width: 450px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 2.25rem;
+}
+.form-group {
+  margin-top: 0.9rem;
+}
+.form-group label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-bottom: 0.3rem;
+}
+.role-toggle {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.85rem;
+  padding: 0.6rem 0.85rem;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.muted {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+.list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.progress-track {
+  height: 8px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.55rem;
+}
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+}
+
+.toast-banner {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  background-color: var(--color-surface);
+  color: var(--color-heading);
+  border: 2px solid var(--color-primary);
+  font-weight: 600;
+  z-index: 9999;
+}
+.toast-success { border-color: var(--color-success); color: var(--color-success); }
+.toast-error { border-color: var(--color-danger); color: var(--color-danger); }
+
+@media (max-width: 960px) {
+  .app-layout { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; }
+  .split-profile-layout { grid-template-columns: 1fr; }
+}

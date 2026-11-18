@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Command Center — Sap</title>
+  <script>
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+  </script>
+  <link rel="stylesheet" href="/styles/main.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Branded Sidebar (Mindskills Reference Style) -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-brand">
+          <div class="brand-badge">CA</div>
+          <span>CollegeAcad</span>
+        </div>
+        <nav>
+          <a href="#" class="nav-item active" data-section="overview">📊 Analytics & Roster</a>
+          <a href="#" class="nav-item" data-section="enrollment">👥 Subjects & Enrollment</a>
+          <a href="#" class="nav-item" data-section="marks">📝 CA & End-Sem Marks</a>
+          <a href="#" class="nav-item" data-section="attendance">📅 Subject Attendance</a>
+          <a href="#" class="nav-item" data-section="risk">⚠️ Hybrid Risk Engine</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="user-pill">
+          <div class="avatar-circle" id="sidebarAvatar">PF</div>
+          <div class="user-meta">
+            <strong id="sidebarName">Faculty</strong>
+            <span id="sidebarDept">CSE (Data Science)</span>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" style="width:100%;">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Top Command Bar (4A + Mindskills Segmented Pills & Search) -->
+      <header class="command-bar">
+        <div class="command-title">
+          <h2>Faculty Command Center</h2>
+          <p>B.Tech CSE (Data Science) • Live PostgreSQL Views & Grading</p>
+        </div>
+
+        <div class="command-actions">
+          <div class="segmented-pills">
+            <button type="button" class="pill-btn active" data-risk-filter="all">All Batch</button>
+            <button type="button" class="pill-btn" data-risk-filter="high">High Risk</button>
+            <button type="button" class="pill-btn" data-risk-filter="medium">Medium Risk</button>
+            <button type="button" class="pill-btn" data-risk-filter="low">On Track</button>
+          </div>
+          <input id="globalStudentSearch" type="search" class="search-pill" placeholder="Search Roll No or Name..." />
+          <button type="button" class="btn btn-secondary btn-sm" data-theme-toggle>🌙 Dark</button>
+          <button id="exportClassCSVBtn" type="button" class="btn btn-primary btn-sm">Export CSV</button>
+        </div>
+      </header>
+
+      <!-- SECTION 1: OVERVIEW + STUDENT DIRECTORY -->
+      <section id="overview" class="dashboard-section active">
+        <div class="grid-4">
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Batch Strength</div>
+              <div class="kpi-value" id="kpiTotalStudents">0</div>
+            </div>
+            <div class="ring-badge">CSE</div>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Batch Avg CGPA</div>
+              <div class="kpi-value" id="kpiAvgCGPA">0.00</div>
+            </div>
+            <div class="ring-badge">10Pt</div>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">Avg Attendance</div>
+              <div class="kpi-value" id="kpiAvgAttendance">100%</div>
+            </div>
+            <div class="ring-badge">75%+</div>
+          </div>
+          <div class="kpi-card">
+            <div>
+              <div class="kpi-label">High-Risk Flagged</div>
+              <div class="kpi-value" id="kpiHighRisk">0</div>
+            </div>
+            <div class="ring-badge">RISK</div>
+          </div>
+        </div>
+
+        <!-- Split Profile Card + Chart (Mindskills Screen 2 Inspiration) -->
+        <div class="split-profile-layout">
+          <div class="profile-banner-card">
+            <div class="profile-banner-avatar" id="facultyBannerAvatar">PF</div>
+            <h3 id="facultyBannerName">Prof. Faculty</h3>
+            <p style="font-size:0.84rem; opacity:0.9;" id="facultyBannerDept">CSE (Data Science)</p>
+            <div class="profile-kv-list">
+              <div class="profile-kv-row"><span>Active Subjects</span><strong id="facultySubjectCount">0</strong></div>
+              <div class="profile-kv-row"><span>Batch Students</span><strong id="facultyBatchCount">0</strong></div>
+              <div class="profile-kv-row"><span>Grading Pattern</span><strong>CA1(15)+CA2(15)+End(70)</strong></div>
+              <div class="profile-kv-row"><span>Scale</span><strong>10-Point Credit CGPA</strong></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="row-between" style="margin-bottom:0.75rem;">
+              <h3>Batch CGPA (10-Pt) vs Hybrid Risk Index (0–100)</h3>
+              <span class="muted">Top 20 by University Roll No</span>
+            </div>
+            <canvas id="facultyPerformanceChart" height="110"></canvas>
+          </div>
+        </div>
+
+        <!-- Solid Cyan Header Data Table (Mindskills Screens 1 & 3) -->
+        <div class="card">
+          <div class="row-between" style="margin-bottom:0.85rem;">
+            <h3>CSE (Data Science) Batch Directory (SQL View: v_student_academic_summary)</h3>
+            <span class="muted">Use top pills or search box to filter</span>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Unv Roll No</th>
+                  <th>Student Name</th>
+                  <th>Sem</th>
+                  <th>CGPA</th>
+                  <th>Avg Internal</th>
+                  <th>Attendance</th>
+                  <th>Backlogs</th>
+                  <th>Risk Score</th>
+                  <th>Active Rule Flags</th>
+                </tr>
+              </thead>
+              <tbody id="studentDirectoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: SUBJECT CREATION & MULTI-SELECT BATCH ENROLLMENT (3A) -->
+      <section id="enrollment" class="dashboard-section">
+        <div class="card" style="margin-bottom:1.25rem;">
+          <h3 style="margin-bottom:0.75rem;">1. Add New University Subject</h3>
+          <form id="createSubjectForm" class="toolbar">
+            <input id="newSubCode" class="input" placeholder="Subject Code (e.g. PCC-CS501)" required />
+            <input id="newSubName" class="input" placeholder="Subject Title" required />
+            <input id="newSubCredits" type="number" min="1" max="6" value="4" class="input" placeholder="Credits" style="max-width:110px;" required />
+            <input id="newSubRoom" class="input" placeholder="Room (e.g. LH-201)" style="max-width:150px;" required />
+            <button type="submit" class="btn btn-primary">+ Create Subject</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="row-between" style="margin-bottom:0.85rem;">
+            <div>
+              <h3>2. Interactive Multi-Select Batch Enrollment</h3>
+              <p class="muted">Select a subject, check individual students or click "Select All Unenrolled", and enroll in one click.</p>
+            </div>
+            <div class="toolbar" style="margin-bottom:0;">
+              <select id="enrollSubjectSelect" class="input"></select>
+              <button type="button" id="selectAllUnenrolledBtn" class="btn btn-secondary">Select All Unenrolled</button>
+              <button type="button" id="enrollSelectedBtn" class="btn btn-primary">Enroll Selected Students</button>
+            </div>
+          </div>
+
+          <div class="table-wrap roster-scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width:50px;">Select</th>
+                  <th>Unv Roll No</th>
+                  <th>Student Name</th>
+                  <th>Stream / Department</th>
+                  <th>Subject Enrollment Status</th>
+                </tr>
+              </thead>
+              <tbody id="batchEnrollmentBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: CA1 + CA2 + END-SEM MARKS ENTRY -->
+      <section id="marks" class="dashboard-section">
+        <div class="card">
+          <div class="row-between" style="margin-bottom:0.85rem;">
+            <div>
+              <h3>University Pattern Marks Entry (CA1: 15 | CA2: 15 | End-Sem: 70)</h3>
+              <p class="muted">PostgreSQL automatically computes Internal Total (30), Total (100), Letter Grade (O–F), Grade Points, and Backlog status.</p>
+            </div>
+            <div class="toolbar" style="margin-bottom:0;">
+              <select id="marksSubjectSelect" class="input"></select>
+              <button type="button" id="saveMarksBtn" class="btn btn-primary">Save & Auto-Grade All</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Unv Roll No</th>
+                  <th>Student Name</th>
+                  <th>CA1 (15)</th>
+                  <th>CA2 (15)</th>
+                  <th>End-Sem (70)</th>
+                  <th>Computed Total & Grade</th>
+                  <th>Faculty Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="marksEntryBody">
+                <tr><td colspan="7" class="muted">Select a subject above to load enrolled students.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: SUBJECT ATTENDANCE -->
+      <section id="attendance" class="dashboard-section">
+        <div class="card">
+          <div class="row-between" style="margin-bottom:0.85rem;">
+            <div>
+              <h3>Subject Lecture Attendance Register</h3>
+              <p class="muted">Students falling below 75% are automatically flagged by the SQL Risk Engine.</p>
+            </div>
+            <div class="toolbar" style="margin-bottom:0;">
+              <select id="attendanceSubjectSelect" class="input"></select>
+              <input id="attendanceDate" type="date" class="input" />
+              <button type="button" id="markAllPresentBtn" class="btn btn-secondary">Mark All Present</button>
+              <button type="button" id="saveAttendanceBtn" class="btn btn-primary">Save Attendance</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Unv Roll No</th>
+                  <th>Student Name</th>
+                  <th>Attendance Status</th>
+                  <th>Lecture Notes</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceEntryBody">
+                <tr><td colspan="4" class="muted">Select a subject and date above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: HYBRID RISK ENGINE & INTERVENTIONS -->
+      <section id="risk" class="dashboard-section">
+        <div class="grid-2">
+          <div>
+            <h3 style="margin-bottom:0.85rem;">Flagged At-Risk Students (SQL Hybrid Engine)</h3>
+            <div id="riskEngineCards" style="display:grid; gap:1rem;"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:0.85rem;">Logged Faculty Interventions</h3>
+            <div id="interventionHistory"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/scripts/teacher-dashboard.js"></script>
+</body>
+</html>

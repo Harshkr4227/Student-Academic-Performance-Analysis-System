@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sap — Student Academic Performance Analysis System</title>
+  <script>
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+  </script>
+  <link rel="stylesheet" href="/styles/main.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div style="display:flex; align-items:center; gap:0.65rem;">
+      <div class="brand-badge">CA</div>
+      <span style="font-weight:800; font-size:1.15rem; color:var(--color-heading);">Sap</span>
+    </div>
+    <div style="display:flex; gap:0.75rem; align-items:center;">
+      <button type="button" class="btn btn-secondary btn-sm" data-theme-toggle>🌙 Dark</button>
+      <a href="/pages/login.html" class="btn btn-secondary">Sign In</a>
+      <a href="/pages/register.html" class="btn btn-primary">Register</a>
+    </div>
+  </nav>
+
+  <main class="hero">
+    <span class="badge badge-info" style="margin-bottom:1rem;">CSE (Data Science) • B.Tech Analytics Portal</span>
+    <h1>Student Academic Performance Analysis System</h1>
+    <p>
+      Credit-weighted 10-point SGPA/CGPA computation, CA1/CA2/End-Sem auto-grading,
+      multi-select batch enrollment, 75% attendance shortage tracking, and hybrid SQL risk detection.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="/pages/login.html" class="btn btn-primary">Open Faculty / Student Portal</a>
+      <a href="/pages/register.html" class="btn btn-secondary">Create University Account</a>
+    </div>
+  </main>
+
+  <script type="module" src="/scripts/auth.js"></script>
+</body>
+</html>
